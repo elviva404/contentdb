@@ -27,8 +27,9 @@
 	{% set release = package.getDownloadRelease() %}
 
 <main>
+	{% set show_tabs = package.checkPerm(current_user, "EDIT_PACKAGE") %}
 	{% set cover_image = package.cover_image.url or package.getMainScreenshotURL() %}
-	<header class="jumbotron pb-3"
+	<header class="jumbotron {% if show_tabs %}pb-0 tabs-container{% else %}pb-3{% endif %}"
 			style="background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url('{{ cover_image }}');
 				background-size: cover;
 				background-repeat: no-repeat;
@@ -147,6 +148,47 @@
 					{% endif %}
 				</div>
 			</div>
+
+			{% if show_tabs %}
+				<nav class="nav nav-tabs nav-fill mt-5" style="margin-bottom: -1px;">
+					<a class="nav-item nav-link active">
+						<i class="fas fa-eye mr-1"></i>
+						{{ _("View") }}
+					</a>
+					<a class="nav-item nav-link" href="{{ package.getEditURL() }}">
+						<i class="fas fa-edit mr-1"></i>
+						{{ _("Edit") }}
+					</a>
+					{% if package.checkPerm(current_user, "MAKE_RELEASE") %}
+						<a class="nav-item nav-link" href="{{ package.getCreateReleaseURL() }}">
+							<i class="fas fa-plus mr-1"></i>
+							{{ _("Release") }}
+						</a>
+						<a class="nav-item nav-link" href="{{ package.getUpdateConfigURL() }}">
+							<i class="fas fa-cog mr-1"></i>
+							{{ _("Update Settings") }}
+						</a>
+					{% endif %}
+					{% if package.checkPerm(current_user, "ADD_SCREENSHOTS") %}
+						<a class="nav-link" href="{{ package.getEditScreenshotsURL() }}" >
+							<i class="fas fa-images mr-1"></i>
+							{{ _("Screenshots") }}
+						</a>
+					{% endif %}
+					{% if package.checkPerm(current_user, "EDIT_MAINTAINERS") %}
+						<a class="nav-item nav-link" href="{{ package.getEditMaintainersURL() }}">
+							<i class="fas fa-users mr-1"></i>
+							{{ _("Maintainers") }}
+						</a>
+					{% endif %}
+					{% if package.checkPerm(current_user, "DELETE_PACKAGE") or package.checkPerm(current_user, "UNAPPROVE_PACKAGE") %}
+						<a class="nav-item nav-link" href="{{ package.getRemoveURL() }}">
+							<i class="fas fa-trash mr-1"></i>
+							{{ _("Delete") }}
+						</a>
+					{% endif %}
+				</nav>
+			{% endif %}
 		</div>
 	</header>
 
@@ -203,14 +245,6 @@
 			<div class="card mb-4">
 				<div class="card-header">
 					Details
-					<div class="btn-group float-right">
-					{% if package.checkPerm(current_user, "EDIT_PACKAGE") %}
-						<a class="btn btn-primary btn-sm ml-1" href="{{ package.getEditURL() }}"><i class="fas fa-edit"></i></a>
-					{% endif %}
-					{% if package.checkPerm(current_user, "DELETE_PACKAGE") or package.checkPerm(current_user, "UNAPPROVE_PACKAGE") %}
-						<a class="btn btn-danger btn-sm ml-1" href="{{ package.getRemoveURL() }}"><i class="fas fa-trash"></i></a>
-					{% endif %}
-					</div>
 				</div>
 
 				{% if package_warning %}
@@ -417,13 +451,6 @@
 				</a>
 			{% endif %}
 		</aside>
-
-		{% if package.checkPerm(current_user, "ADD_SCREENSHOTS") %}
-			<a href="{{ package.getEditScreenshotsURL() }}" class="btn btn-primary float-right">
-				<i class="fas fa-images mr-1"></i>
-				Edit
-			</a>
-		{% endif %}
 
 		<ul class="screenshot_list mb-4">
 			{% for ss in package.screenshots %}
