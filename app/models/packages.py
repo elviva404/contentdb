@@ -473,6 +473,10 @@ class Package(db.Model):
 		return url_for("packages.create_edit",
 				author=self.author.username, name=self.name)
 
+	def getReleaseListURL(self):
+		return url_for("packages.list_releases",
+				author=self.author.username, name=self.name)
+
 	def getSetStateURL(self, state):
 		if type(state) == str:
 			state = PackageState[state]
